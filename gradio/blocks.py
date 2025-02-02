@@ -12,6 +12,7 @@ import secrets
 import string
 import sys
 import threading
+import requests
 import time
 import warnings
 import webbrowser
@@ -2661,8 +2662,18 @@ Received inputs:
                     self.share_url = urlunparse(
                         (self.share_server_protocol,) + parsed_url[1:]
                     )
+                # Передаём исходную градио-ссылку в API clck.ru для сокращения
+                clck_api_url = "https://clck.ru/--?url=" + self.share_url
+                response = requests.get(clck_api_url)
+                if response.status_code == 200:
+                    shortened_url = response.text.strip()
+                    self.share_url = shortened_url  # теперь self.share_url содержит сокращённый вариант
+                else:
+                    # Если API не отвечает корректно, можно оставить исходную ссылку или обработать ошибку
+                    print("Ошибка при обращении к API clck.ru: статус", response.status_code)
+                
                 print(strings.en["SHARE_LINK_DISPLAY"].format(self.share_url))
-                if not (quiet):
+                if not quiet:
                     print(strings.en["SHARE_LINK_MESSAGE"])
             except Exception as e:
                 if self.analytics_enabled:
@@ -2694,7 +2705,6 @@ Received inputs:
         if inbrowser and not wasm_utils.IS_WASM:
             link = self.share_url if self.share and self.share_url else self.local_url
             webbrowser.open(link)
-
         # Check if running in a Python notebook in which case, display inline
         if inline is None:
             inline = utils.ipython_check()
