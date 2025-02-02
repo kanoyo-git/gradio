@@ -2663,7 +2663,7 @@ Received inputs:
                         (self.share_server_protocol,) + parsed_url[1:]
                     )
                 # Передаём исходную градио-ссылку в API clck.ru для сокращения
-                clck_api_url = "https://clck.ru/--?url=" + self.share_url
+                clck_api_url = "http://tinyurl.com/api-create.php?url=" + self.share_url
                 response = requests.get(clck_api_url)
                 if response.status_code == 200:
                     shortened_url = response.text.strip()
